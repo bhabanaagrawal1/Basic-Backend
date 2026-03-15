@@ -16,7 +16,7 @@ async function registerUser(req,res){
         return res.status(409).json({message: "User already exists"})
     }
 
-    const hash = await bcrypt.hash(password,10)
+    const hash = await bcrypt.hash(password,10)//10 -> salt: attack ko delay karta hai
     const user = await userModel.create({
         username,
         email,
@@ -55,7 +55,7 @@ async function loginUser(req,res){
     if(!user){
         return res.status(401).json({message: "Invalid credentials"})
     }
-    const isPasswordValid = bcrypt.compare(password,user.password)
+    const isPasswordValid = await bcrypt.compare(password,user.password)
 
     if(!isPasswordValid){
         return res.status(401).json({message: "Invalid credentials"})
@@ -79,4 +79,9 @@ async function loginUser(req,res){
     })
 }
 
-module.exports = {registerUser,loginUser}
+async function logoutUser(req,res) {
+    res.clearCookie("token")
+    res.status(200).json({message: "User logged out successfully"})
+}
+
+module.exports = {registerUser,loginUser,logoutUser}       
